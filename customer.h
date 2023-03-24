@@ -17,7 +17,7 @@ double departure(void);
 
 void updateTimes(double time_passed);
 
-int customers(void);
+unsigned int customers(void);
 
 double getArrivalTime(void);
 

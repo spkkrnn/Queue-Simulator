@@ -6,11 +6,12 @@
 #include "customer.h."
 
 
-srand(time(NULL));
+//srand(time(NULL));
 struct customer *head = NULL;
 
 double rand_exp(double *lambda) /* Returns a random number from the exponential distribution */
 {
+    srand(time(NULL));
 	return (-log((double) rand() / RAND_MAX) / *lambda);
 }
 
@@ -25,7 +26,7 @@ struct customer* createCustomer(double arrival_time, double service_time, struct
 void arrival(double arrival_time, double *mu) {
     double service_time = rand_exp(mu);
     if (head == NULL) {
-        createCustomer(arrival_time, double service_time, head);
+        createCustomer(arrival_time, service_time, head);
         return;
     }
     struct customer *current = head;
@@ -48,21 +49,31 @@ double departure(void) {
     double arrival_time = head->arrival_time;
     struct customer *departer = head;
     head = head->next;
-    free(departer);
+    //free(departer);
     return arrival_time;
 }
 
 void updateTimes(double time_passed) {
-    struct node *ptr = head;
+    struct customer *ptr = head;
     while (ptr != NULL) {
         ptr->service_time -= time_passed;
         ptr = ptr->next;
     }
 }
 
-int customers(void) {
-    int n = 0;
-    for (struct node *current = head; current !=NULL; current = current->next) {
+void printInfo(void) {
+    unsigned int number = 1;
+    struct customer *ptr = head;
+    printf("\n");
+    while (ptr != NULL) {
+        printf("Customer %u: Time arrived %0.3f s, time left %0.3f s.\n", number, ptr->arrival_time, ptr->service_time);
+        ptr = ptr->next;
+    }
+}
+
+unsigned int customers(void) {
+    unsigned int n = 0;
+    for (struct customer *current = head; current !=NULL; current = current->next) {
         n++;
     }
     return n;
@@ -73,5 +84,6 @@ double getArrivalTime(void) {
 }
 
 double getRemainingTime(void) {
-    return head->service_time;
+    double remaining = head->service_time;
+    return remaining;
 }

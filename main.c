@@ -38,7 +38,7 @@ double avgAgePS(int n, double *lambda, double *mu) {
     while (arrivals <= n) {
         if (customers == 0) {
             time = next_arrival;
-            next += rand_exp(lambda);
+            next_arrival += rand_exp(lambda);
             arrival(time, mu);
             arrivals++;
             customers++;
@@ -63,10 +63,11 @@ double avgAgePS(int n, double *lambda, double *mu) {
                 }
                 area += update_area;
             }
-            updateTimes();
+            updateTimes(relative_time);
             departure();
             customers--;
-        }    
+        }
+        printInfo();    
     }
     return (*lambda * area / n);
 }
@@ -76,11 +77,11 @@ int main(void)
 	double arrivalRate = 0.5;
 	double serviceRate = 1;
 	double load = arrivalRate / serviceRate;
-	int arrivals = 1000000;
+	int arrivals = 10;
 
-	double AoI = avgAgeFIFO(arrivals, &arrivalRate, &serviceRate);
+	double AoI = avgAgePS(arrivals, &arrivalRate, &serviceRate);
 	double modelAoI = (1 + 1/load + (load*load)/(1 - load)) / serviceRate;
-	printf("Average age of information: %0.3f s\n", AoI);
-	printf("Average age according to formula: %0.3f s\n", modelAoI); 
+	printf("Average age of information: %0.5f s\n", AoI);
+	printf("Average age according to formula: %0.5f s\n", modelAoI); 
 	return 0;
 }
