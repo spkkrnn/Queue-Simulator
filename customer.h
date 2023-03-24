@@ -7,8 +7,20 @@ struct customer {
 	struct customer *next;
 };
 
-struct customer* addCustomer(double arrival_time, double service_time, struct customer *next_customer);
+struct customer* createCustomer(double arrival_time, double service_time, struct customer *next_customer);
 
-void insertCustomer(double arrival_time, double service_time);
+double rand_exp(double *lambda);
+
+void arrival(double arrival_time, double *mu);
+
+double departure(void);
+
+void updateTimes(double time_passed);
+
+int customers(void);
+
+double getArrivalTime(void);
+
+double getRemainingTime(void);
 
 #endif
