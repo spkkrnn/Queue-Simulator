@@ -3,87 +3,78 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
-#include "customer.h."
+#include "customer.h"
 
-
-//srand(time(NULL));
-struct customer *head = NULL;
-
-double rand_exp(double *lambda) /* Returns a random number from the exponential distribution */
-{
-    srand(time(NULL));
-	return (-log((double) rand() / RAND_MAX) / *lambda);
-}
 
 struct customer* createCustomer(double arrival_time, double service_time, struct customer *next_customer) {
-	struct customer *new_customer = (struct customer*) malloc(sizeof(struct customer));
+	struct customer *new_customer = malloc(sizeof(struct customer));
 	new_customer->arrival_time = arrival_time;
 	new_customer->service_time = service_time;
 	new_customer->next = next_customer;
 	return new_customer;
 }
 
-void arrival(double arrival_time, double *mu) {
-    double service_time = rand_exp(mu);
-    if (head == NULL) {
-        createCustomer(arrival_time, service_time, head);
+void arrival(struct customer **head, double arrival_time, double service_time) {
+    struct customer *current = *head;
+    struct customer *new_customer = malloc(sizeof(struct customer));
+	new_customer->arrival_time = arrival_time;
+	new_customer->service_time = service_time;
+	//new_customer->next = next_customer;
+    if (*head == NULL) {
+        //createcustomer(arrival_time, service_time, head);
+        new_customer->next = NULL;
+        *head = new_customer;
         return;
     }
-    struct customer *current = head;
-    struct customer *prev = head;
-    while (service_time > current->service_time) {
+    if (service_time < current->service_time) {
+        new_customer->next = *head;
+        *head = new_customer;
+        return;
+    }
+    struct customer *prev = NULL;
+    while (current != NULL) {
+        if (service_time > current->service_time) break;
         prev = current;
         current = current->next;
-        if (current == NULL) break;
     }
-    current = createCustomer(arrival_time, service_time, current);
-    if (service_time < head->service_time) {
-        head = current;
+    //struct customer *current2 = createcustomer(arrival_time, service_time, current);
+    if (current != NULL) {
+        new_customer->next = current->next;
+        current->next = new_customer;
     }
     else {
-        prev->next = current;
+        new_customer->next = current;
+        if (prev != NULL) {
+        prev->next = new_customer;
+        }
     }
 }
 
-double departure(void) {
-    double arrival_time = head->arrival_time;
-    struct customer *departer = head;
-    head = head->next;
-    //free(departer);
+double departure(struct customer **head) {
+    if (*head == NULL) return 0;
+    struct customer *leaver = *head;
+    double arrival_time = leaver->arrival_time;
+    //struct customer *departer = head;
+    *head = leaver->next;
+    free(leaver);
     return arrival_time;
 }
 
-void updateTimes(double time_passed) {
-    struct customer *ptr = head;
+void updateTimes(struct customer **head, double time_passed) {
+    struct customer *ptr = *head;
     while (ptr != NULL) {
         ptr->service_time -= time_passed;
         ptr = ptr->next;
     }
 }
 
-void printInfo(void) {
+void printInfo(struct customer **head) {
     unsigned int number = 1;
-    struct customer *ptr = head;
+    struct customer *ptr = *head;
     printf("\n");
     while (ptr != NULL) {
         printf("Customer %u: Time arrived %0.3f s, time left %0.3f s.\n", number, ptr->arrival_time, ptr->service_time);
         ptr = ptr->next;
+        number ++;
     }
-}
-
-unsigned int customers(void) {
-    unsigned int n = 0;
-    for (struct customer *current = head; current !=NULL; current = current->next) {
-        n++;
-    }
-    return n;
-}
-
-double getArrivalTime(void) {
-    return head->arrival_time;
-}
-
-double getRemainingTime(void) {
-    double remaining = head->service_time;
-    return remaining;
 }

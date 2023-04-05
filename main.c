@@ -1,8 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include "customer.h"
 
+double rand_exp(double *lambda) /* Returns a random number from the exponential distribution */
+{
+	return (-log((double) rand() / RAND_MAX) / *lambda);
+}
 
 double avgAgeFIFO(int n, double *lambda,  double *mu) { /* Returns the average age of information */
 	double time = 0;
@@ -23,63 +28,64 @@ double avgAgeFIFO(int n, double *lambda,  double *mu) { /* Returns the average a
 	return (*lambda*area/n);
 }
 
-double avgAgePS(int n, double *lambda, double *mu) {
+double avgAgePS(int *n, double *lambda, double *mu) {
     int arrivals = 0;
     int customers = 0;
     double time = 0;
     double relative_time = 0;
     double next_arrival = rand_exp(lambda);
     double area = 0;
+    struct customer *first = NULL;
     double last_update[2]; /* arrival and departure times of latest relevant update */
     double update_area = 0;
     double duration = 0;
     last_update[0] = 0;
     last_update[1] = next_arrival;
-    while (arrivals <= n) {
+    while (arrivals <= *n) {
         if (customers == 0) {
             time = next_arrival;
             next_arrival += rand_exp(lambda);
-            arrival(time, mu);
+            arrival(&first, time, rand_exp(mu));
             arrivals++;
             customers++;
         }
         relative_time = (next_arrival - time) / customers;
-        if (getRemainingTime() > relative_time) {
+        if (first != NULL && first->service_time > relative_time) {
             time = next_arrival;
             next_arrival += rand_exp(lambda);
-            updateTimes(relative_time);
-            arrival(time, mu);
+            updateTimes(&first, relative_time);
+            arrival(&first, time, rand_exp(mu));
             arrivals++;
             customers++;
         } else {
-            relative_time = getRemainingTime();
+            relative_time = first->service_time;
             time += customers * relative_time;
-            if (getArrivalTime() > last_update[0]) {
-                duration = time - getArrivalTime();
+            if (first->arrival_time > last_update[0]) {
+                duration = time - first->arrival_time;
                 update_area = (duration * duration) / 2;
-                if (last_update[1] > getArrivalTime()) {
-                    duration = last_update[1] - getArrivalTime();
+                if (last_update[1] > first->arrival_time) {
+                    duration = last_update[1] - first->arrival_time;
                     update_area -= (duration * duration) / 2;
                 }
                 area += update_area;
             }
-            updateTimes(relative_time);
-            departure();
+            updateTimes(&first, relative_time);
+            departure(&first);
             customers--;
-        }
-        printInfo();    
+        }  
     }
-    return (*lambda * area / n);
+    return (*lambda * area / *n);
 }
 
 int main(void)
 {
+    srand(time(NULL));
 	double arrivalRate = 0.5;
 	double serviceRate = 1;
 	double load = arrivalRate / serviceRate;
-	int arrivals = 10;
+	int arrivals = 10000;
 
-	double AoI = avgAgePS(arrivals, &arrivalRate, &serviceRate);
+	double AoI = avgAgePS(&arrivals, &arrivalRate, &serviceRate);
 	double modelAoI = (1 + 1/load + (load*load)/(1 - load)) / serviceRate;
 	printf("Average age of information: %0.5f s\n", AoI);
 	printf("Average age according to formula: %0.5f s\n", modelAoI); 

@@ -11,16 +11,12 @@ struct customer* createCustomer(double arrival_time, double service_time, struct
 
 double rand_exp(double *lambda);
 
-void arrival(double arrival_time, double *mu);
+void arrival(struct customer **head, double arrival_time, double service_time);
 
-double departure(void);
+double departure(struct customer **head);
 
-void updateTimes(double time_passed);
+void updateTimes(struct customer **head, double time_passed);
 
-unsigned int customers(void);
-
-double getArrivalTime(void);
-
-double getRemainingTime(void);
+void printInfo(struct customer **head);
 
 #endif
