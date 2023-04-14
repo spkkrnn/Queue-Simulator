@@ -19,34 +19,27 @@ void arrival(struct customer **head, double arrival_time, double service_time) {
     struct customer *new_customer = malloc(sizeof(struct customer));
 	new_customer->arrival_time = arrival_time;
 	new_customer->service_time = service_time;
-	//new_customer->next = next_customer;
     if (*head == NULL) {
-        //createcustomer(arrival_time, service_time, head);
         new_customer->next = NULL;
         *head = new_customer;
         return;
-    }
-    if (service_time < current->service_time) {
+    } else if (service_time < current->service_time) {
         new_customer->next = *head;
         *head = new_customer;
         return;
     }
-    struct customer *prev = NULL;
+    struct customer *previous = NULL;
     while (current != NULL) {
-        if (service_time > current->service_time) break;
-        prev = current;
+        if (service_time < current->service_time) break;
+        previous = current;
         current = current->next;
     }
-    //struct customer *current2 = createcustomer(arrival_time, service_time, current);
-    if (current != NULL) {
-        new_customer->next = current->next;
-        current->next = new_customer;
-    }
-    else {
+    if (previous != NULL) {
         new_customer->next = current;
-        if (prev != NULL) {
-        prev->next = new_customer;
-        }
+        previous->next = new_customer;
+    } else { /* Should never occur */
+        new_customer->next = current;
+        *head = new_customer;
     }
 }
 
@@ -54,7 +47,6 @@ double departure(struct customer **head) {
     if (*head == NULL) return 0;
     struct customer *leaver = *head;
     double arrival_time = leaver->arrival_time;
-    //struct customer *departer = head;
     *head = leaver->next;
     free(leaver);
     return arrival_time;
@@ -76,5 +68,14 @@ void printInfo(struct customer **head) {
         printf("Customer %u: Time arrived %0.3f s, time left %0.3f s.\n", number, ptr->arrival_time, ptr->service_time);
         ptr = ptr->next;
         number ++;
+    }
+}
+
+void freeRemaining(struct customer **head) {
+    struct customer *ptr = *head;
+    while (*head != NULL) {
+        ptr = *head;
+        *head = ptr->next;
+        free(ptr);
     }
 }

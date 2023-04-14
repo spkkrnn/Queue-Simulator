@@ -19,4 +19,6 @@ void updateTimes(struct customer **head, double time_passed);
 
 void printInfo(struct customer **head);
 
+void freeRemaining(struct customer **head);
+
 #endif
