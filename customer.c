@@ -6,7 +6,7 @@
 #include "customer.h"
 
 
-struct customer* createCustomer(double arrival_time, double service_time, struct customer *next_customer) {
+struct customer* create_customer(double arrival_time, double service_time, struct customer *next_customer) {
 	struct customer *new_customer = malloc(sizeof(struct customer));
 	new_customer->arrival_time = arrival_time;
 	new_customer->service_time = service_time;
@@ -52,7 +52,7 @@ double departure(struct customer **head) {
     return arrival_time;
 }
 
-void updateTimes(struct customer **head, double time_passed) {
+void update_times(struct customer **head, double time_passed) {
     struct customer *ptr = *head;
     while (ptr != NULL) {
         ptr->service_time -= time_passed;
@@ -60,7 +60,7 @@ void updateTimes(struct customer **head, double time_passed) {
     }
 }
 
-void printInfo(struct customer **head) {
+void print_info(struct customer **head) {
     unsigned int number = 1;
     struct customer *ptr = *head;
     printf("\n");
@@ -71,7 +71,7 @@ void printInfo(struct customer **head) {
     }
 }
 
-void freeRemaining(struct customer **head) {
+void free_remaining(struct customer **head) {
     struct customer *ptr = *head;
     while (*head != NULL) {
         ptr = *head;

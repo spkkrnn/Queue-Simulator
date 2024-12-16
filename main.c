@@ -9,7 +9,7 @@ double rand_exp(double *lambda) /* Returns a random number from the exponential 
 	return (-log((double) rand() / RAND_MAX) / *lambda);
 }
 
-double avgAgeFIFO(unsigned int *n, double *lambda,  double *mu) { /* Returns the average age of information */
+double get_aoi_fifo(unsigned int *n, double *lambda,  double *mu) { /* Returns the average age of information for a FIFO queue */
 	double time = 0;
 	double area = 0;
 	double last = 0;
@@ -28,7 +28,7 @@ double avgAgeFIFO(unsigned int *n, double *lambda,  double *mu) { /* Returns the
 	return (*lambda * area / *n);
 }
 
-double avgAgePS(unsigned int *n, double *lambda, double *mu) {
+double get_aoi_ps(unsigned int *n, double *lambda, double *mu) { /* Returns the average age of information for a PS queue */
     int arrivals = 0;
     int customers = 0;
     double time = 0;
@@ -51,7 +51,7 @@ double avgAgePS(unsigned int *n, double *lambda, double *mu) {
         if (first != NULL && first->service_time > relative_time) {
             time = next_arrival;
             next_arrival += rand_exp(lambda);
-            updateTimes(&first, relative_time);
+            update_times(&first, relative_time);
             arrival(&first, time, rand_exp(mu));
             arrivals++;
             customers++;
@@ -64,27 +64,35 @@ double avgAgePS(unsigned int *n, double *lambda, double *mu) {
                 last_update[1] = time;
             }
             departure(&first);
-            updateTimes(&first, relative_time);
+            update_times(&first, relative_time);
             customers--;
         }  
     }
-    freeRemaining(&first);
+    free_remaining(&first);
     return (*lambda * area / *n);
 }
 
-int main(void)
+int main(int argc, char* argv[])
 {
+    /* Check number of input arguments */
+    if (argc < 2) {
+        printf("Using default values.\n");
+    }
+
     /* Set up parameters */
     srand(time(NULL));
-	double arrivalRate = 0.5;
-	double serviceRate = 1;
-	double load = arrivalRate / serviceRate;
+	double arrival_rate = 0.5;
+	double service_rate = 1;
+	double load = arrival_rate / service_rate;
 	unsigned int arrivals = 1000000;
 
-    double age_fifo = avgAgeFIFO(&arrivals, &arrivalRate, &serviceRate);
-	double age_ps = avgAgePS(&arrivals, &arrivalRate, &serviceRate);
-	double model_age = (1 + 1/load + (load*load)/(1 - load)) / serviceRate;
-    printf("%u customers arrived at rate %0.1f and were served at service rate %0.1f\n", arrivals, arrivalRate, serviceRate);
+    /* Calculate averages */
+    double age_fifo = get_aoi_fifo(&arrivals,  &arrival_rate, &service_rate);
+	double age_ps = get_aoi_ps(&arrivals,  &arrival_rate, &service_rate);
+	double model_age = (1 + 1/load + (load*load)/(1 - load)) / service_rate;
+
+    /* Print values */
+    printf("%u customers arrived at rate %0.1f and were served at service rate %0.1f\n", arrivals, arrival_rate, service_rate);
 	printf("Average age according to mathematical model for FIFO queues: %0.3f s\n", model_age);
     printf("Simulated average age of information for a FIFO queue: %0.3f s\n", age_fifo);
     printf("Simulated average age of information for a PS queue: %0.3f s\n", age_ps);
