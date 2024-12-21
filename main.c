@@ -9,7 +9,7 @@ double rand_exp(double *lambda) /* Returns a random number from the exponential 
 	return (-log((double) rand() / RAND_MAX) / *lambda);
 }
 
-double get_aoi_fifo(unsigned int *n, double *lambda,  double *mu) { /* Returns the average age of information for a FIFO queue */
+double get_aoi_fifo(long *n, double *lambda,  double *mu) { /* Returns the average age of information for a FIFO queue */
 	double time = 0;
 	double area = 0;
 	double last = 0;
@@ -28,7 +28,7 @@ double get_aoi_fifo(unsigned int *n, double *lambda,  double *mu) { /* Returns t
 	return (*lambda * area / *n);
 }
 
-double get_aoi_ps(unsigned int *n, double *lambda, double *mu) { /* Returns the average age of information for a PS queue */
+double get_aoi_ps(long *n, double *lambda, double *mu) { /* Returns the average age of information for a PS queue */
     int arrivals = 0;
     int customers = 0;
     double time = 0;
@@ -73,10 +73,18 @@ double get_aoi_ps(unsigned int *n, double *lambda, double *mu) { /* Returns the 
 }
 
 int main(int argc, char* argv[])
-{
-    /* Check number of input arguments */
+{   
+    long arrivals = 10000000;
+    /* Handle input arguments */
     if (argc < 2) {
-        printf("Using default values.\n");
+        printf("Using default values. To change the number of arrivals, provide number.\n");
+    }
+    else {
+        arrivals = strtol(argv[1], NULL, 10);
+        if (arrivals <= 0) {
+            printf("Invalid number of customers.\n");
+            return 1;
+        }
     }
 
     /* Set up parameters */
@@ -84,7 +92,6 @@ int main(int argc, char* argv[])
 	double arrival_rate = 0.5;
 	double service_rate = 1;
 	double load = arrival_rate / service_rate;
-	unsigned int arrivals = 1000000;
 
     /* Calculate averages */
     double age_fifo = get_aoi_fifo(&arrivals,  &arrival_rate, &service_rate);
@@ -92,7 +99,7 @@ int main(int argc, char* argv[])
 	double model_age = (1 + 1/load + (load*load)/(1 - load)) / service_rate;
 
     /* Print values */
-    printf("%u customers arrived at rate %0.1f and were served at service rate %0.1f\n", arrivals, arrival_rate, service_rate);
+    printf("%ld customers arrived at rate %0.1f and were served at service rate %0.1f\n", arrivals, arrival_rate, service_rate);
 	printf("Average age according to mathematical model for FIFO queues: %0.3f s\n", model_age);
     printf("Simulated average age of information for a FIFO queue: %0.3f s\n", age_fifo);
     printf("Simulated average age of information for a PS queue: %0.3f s\n", age_ps);
